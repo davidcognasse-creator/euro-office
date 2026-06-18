@@ -1,0 +1,10 @@
+# Configuration de déploiement Netlify.
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Les redirections sont définies dans public/_redirects (copié dans dist/).

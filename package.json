@@ -1,0 +1,24 @@
+{
+  "name": "euro-office-actus",
+  "version": "1.0.0",
+  "description": "Site d'actualités et de formation autour d'Euro-Office, la suite bureautique souveraine européenne.",
+  "type": "module",
+  "scripts": {
+    "build": "node src/build.mjs",
+    "dev": "node src/build.mjs --watch & node src/serve.mjs",
+    "serve": "node src/serve.mjs",
+    "newsletter": "node scripts/send-newsletter.mjs",
+    "newsletter:preview": "node scripts/send-newsletter.mjs --preview"
+  },
+  "keywords": [
+    "euro-office",
+    "bureautique",
+    "souveraineté",
+    "open-source",
+    "actualités"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "marked": "^12.0.2"
+  }
+}

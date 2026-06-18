@@ -1,0 +1,5 @@
+# Netlify : route l'API d'inscription vers la fonction serverless.
+/api/subscribe   /.netlify/functions/subscribe   200
+
+# Page 404 personnalisée.
+/*   /404.html   404

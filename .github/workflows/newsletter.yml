@@ -1,0 +1,43 @@
+name: Newsletter mensuelle
+
+# Envoie automatiquement la newsletter le 1er de chaque mois à 8h00 UTC.
+# Le script cible le mois précédent et n'envoie rien s'il n'y a aucun article.
+on:
+  schedule:
+    - cron: "0 8 1 * *"
+  # Déclenchement manuel possible (avec un mois optionnel au format YYYY-MM).
+  workflow_dispatch:
+    inputs:
+      month:
+        description: "Mois à envoyer (YYYY-MM). Vide = mois précédent."
+        required: false
+        default: ""
+      preview:
+        description: "Aperçu seulement (true/false) — n'envoie pas l'e-mail."
+        required: false
+        default: "false"
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Envoyer la newsletter
+        env:
+          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
+          BREVO_LIST_ID: ${{ secrets.BREVO_LIST_ID }}
+          NEWSLETTER_MONTH: ${{ github.event.inputs.month }}
+        run: |
+          if [ "${{ github.event.inputs.preview }}" = "true" ]; then
+            node scripts/send-newsletter.mjs --preview
+          else
+            node scripts/send-newsletter.mjs
+          fi
