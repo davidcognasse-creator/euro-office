@@ -7,7 +7,7 @@ name: Déploiement GitHub Pages
 # Action dédiée et fonctionne quel que soit l'hébergeur.
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "claude/youthful-cori-754fqt"]
   workflow_dispatch:
 
 permissions:
