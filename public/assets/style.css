@@ -194,6 +194,13 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.15;
 .nl-status { flex-basis: 100%; margin: 4px 0 0; font-size: 0.9rem; min-height: 1.2em; color: rgba(255,255,255,0.9); }
 .nl-status.ok { color: #c9f5d9; }
 .nl-status.error { color: #ffd9d2; }
+.nl-cta-btn { background: var(--gold); color: var(--ink); border-color: var(--gold); white-space: nowrap; }
+.nl-cta-btn:hover { background: #ffd633; }
+
+/* Formulaire Brevo intégré (mode GitHub Pages) */
+.nl-embed { background: var(--bg-tint); border: 1px solid var(--line); border-radius: var(--radius-lg); padding: 16px; }
+.nl-embed iframe { width: 100%; min-height: 460px; border: 0; border-radius: var(--radius); background: #fff; display: block; }
+.nl-embed .nl-legal { padding: 12px 12px 4px; }
 
 /* --- Page article & prose ------------------------------------------------- */
 .article-head {

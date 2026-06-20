@@ -120,19 +120,34 @@ rien** s'il n'y en a aucun. Déclenchement manuel possible via
 Le site est **statique** ; le formulaire d'inscription est une **fonction
 serverless**. Choisissez selon vos besoins :
 
-| Hébergeur | Site statique | Formulaire d'inscription | Config |
+| Hébergeur | Site statique | Formulaire d'inscription | `basePath` |
 | --- | --- | --- | --- |
-| **Netlify** ✅ | oui | oui (`netlify/functions/`) | `netlify.toml` |
-| **Vercel** ✅ | oui | oui (`api/`) | `vercel.json` |
-| **GitHub Pages** | oui | ❌ (pas de serverless) | `.github/workflows/deploy-pages.yml` |
+| **GitHub Pages** ✅ | oui | via formulaire Brevo intégré (`newsletter.embedUrl`) | `/euro-office` |
+| **Netlify** ✅ | oui | fonction serverless (`netlify/functions/`) | `""` |
+| **Vercel** ✅ | oui | fonction serverless (`api/`) | `""` |
 
-**Recommandé : Netlify ou Vercel** pour bénéficier du formulaire d'inscription.
+> ⚙️ **`basePath` (important)** — dans `site.config.mjs`. Un dépôt de projet
+> GitHub Pages est servi sous un sous-dossier (`…github.io/euro-office/`) :
+> laissez `basePath: "/euro-office"`. Sur Netlify, Vercel ou un **domaine
+> personnalisé** (site servi à la racine), mettez `basePath: ""`.
 
-1. Connectez le dépôt à Netlify/Vercel.
-2. Commande de build : `npm run build` · dossier publié : `dist`.
-3. Ajoutez les variables `BREVO_API_KEY` et `BREVO_LIST_ID`.
-4. Mettez à jour `site.url` dans `site.config.mjs` avec votre domaine final
-   (utilisé par le RSS, le sitemap et les liens de la newsletter).
+### GitHub Pages (option choisie)
+
+1. **Settings → Pages → Build and deployment → Source : « GitHub Actions »**.
+2. Le workflow `deploy-pages.yml` construit et publie le site à chaque push.
+3. Formulaire d'inscription : créez un **formulaire dans Brevo**
+   (*Contacts → Formulaires*), copiez son URL et collez-la dans
+   `site.config.mjs` → `newsletter.embedUrl`. (Cette URL est publique, ce
+   n'est pas un secret.)
+4. Vérifiez `site.url` (`https://VOTRE-COMPTE.github.io`) et
+   `basePath` (`/euro-office`).
+
+### Netlify / Vercel
+
+1. Connectez le dépôt ; build `npm run build`, dossier publié `dist`.
+2. Mettez `basePath: ""` et `site.url` = votre domaine.
+3. Ajoutez les variables `BREVO_API_KEY` et `BREVO_LIST_ID` (le formulaire
+   serverless `/api/subscribe` est alors utilisé automatiquement).
 
 La newsletter mensuelle fonctionne **quel que soit l'hébergeur** (elle part
 depuis GitHub Actions).

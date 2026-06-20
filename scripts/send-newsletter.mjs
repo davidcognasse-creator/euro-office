@@ -20,6 +20,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { site } from "../site.config.mjs";
 import { parseFrontMatter, formatDateFr, monthLabelFr, slugify } from "../src/lib.mjs";
+import { abs } from "../src/url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -58,10 +59,10 @@ function buildEmail(articles, ym) {
     .map(
       (a) => `
       <tr><td style="padding:0 0 26px;">
-        <a href="${site.url}${a.url}" style="color:#003399;text-decoration:none;font-family:Georgia,serif;font-size:20px;font-weight:bold;line-height:1.3;display:block;">${a.title}</a>
+        <a href="${abs(a.url)}" style="color:#003399;text-decoration:none;font-family:Georgia,serif;font-size:20px;font-weight:bold;line-height:1.3;display:block;">${a.title}</a>
         <div style="color:#717885;font-size:13px;margin:6px 0 8px;">${formatDateFr(a.date)}${a.kicker ? " · " + a.kicker : ""}</div>
         <div style="color:#23282f;font-size:15px;line-height:1.6;">${a.description}</div>
-        <a href="${site.url}${a.url}" style="color:#003399;font-size:14px;font-weight:bold;text-decoration:none;display:inline-block;margin-top:8px;">Lire l'article →</a>
+        <a href="${abs(a.url)}" style="color:#003399;font-size:14px;font-weight:bold;text-decoration:none;display:inline-block;margin-top:8px;">Lire l'article →</a>
       </td></tr>`
     )
     .join("");
@@ -83,12 +84,12 @@ function buildEmail(articles, ym) {
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${items}</table>
         </td></tr>
         <tr><td style="padding:8px 32px 28px;">
-          <a href="${site.url}/formation/" style="display:inline-block;background:#003399;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 22px;border-radius:999px;">Découvrir l'espace formation</a>
+          <a href="${abs("/formation/")}" style="display:inline-block;background:#003399;color:#ffffff;font-size:14px;font-weight:bold;text-decoration:none;padding:12px 22px;border-radius:999px;">Découvrir l'espace formation</a>
         </td></tr>
         <tr><td style="background:#f7f8fa;padding:22px 32px;border-top:1px solid #e7e9ee;">
           <p style="color:#717885;font-size:12px;line-height:1.6;margin:0;">
             Vous recevez cet e-mail car vous êtes inscrit·e à la newsletter d'${site.shortName} Actus.<br>
-            <a href="{{ unsubscribe }}" style="color:#717885;">Se désabonner</a> · <a href="${site.url}" style="color:#717885;">${site.url.replace("https://", "")}</a>
+            <a href="{{ unsubscribe }}" style="color:#717885;">Se désabonner</a> · <a href="${abs("/")}" style="color:#717885;">${abs("/").replace(/^https?:\/\//, "").replace(/\/$/, "")}</a>
           </p>
         </td></tr>
       </table>

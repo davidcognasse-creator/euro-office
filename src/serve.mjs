@@ -5,6 +5,7 @@ import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { basePath } from "./url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DIST = path.resolve(__dirname, "..", "dist");
@@ -26,6 +27,10 @@ const TYPES = {
 
 function resolveFile(urlPath) {
   let p = decodeURIComponent(urlPath.split("?")[0]);
+  // Reproduit le préfixe de GitHub Pages en local : on le retire pour résoudre.
+  if (basePath && p.startsWith(basePath)) {
+    p = p.slice(basePath.length) || "/";
+  }
   let file = path.join(DIST, p);
   if (fs.existsSync(file) && fs.statSync(file).isDirectory()) {
     file = path.join(file, "index.html");

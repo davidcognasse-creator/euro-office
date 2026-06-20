@@ -18,6 +18,7 @@ import {
   articleCard,
   newsletterBlock,
 } from "./templates.mjs";
+import { withBase, abs, rewriteLinks } from "./url.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
@@ -66,7 +67,7 @@ function loadArticles() {
     const baseSlug =
       data.slug || file.replace(/\.md$/, "").replace(/^\d{4}-\d{2}-\d{2}-/, "");
     const slug = slugify(baseSlug);
-    const html = marked.parse(body);
+    const html = rewriteLinks(marked.parse(body));
     return {
       ...data,
       slug,
@@ -93,7 +94,7 @@ function loadFormation() {
       ...data,
       slug,
       url: `/formation/${slug}/`,
-      html: marked.parse(body),
+      html: rewriteLinks(marked.parse(body)),
       order: Number(data.order || 99),
       duration: data.duration || "",
     };
@@ -105,7 +106,7 @@ function loadFormation() {
 function loadPage(name) {
   const file = path.join(CONTENT, "pages", `${name}.md`);
   const { data, body } = parseFrontMatter(read(file));
-  return { ...data, html: marked.parse(body) };
+  return { ...data, html: rewriteLinks(marked.parse(body)) };
 }
 
 // ----------------------------------------------------------------------------
@@ -121,8 +122,8 @@ function renderHome(articles, modules) {
     <h1>Suivez l'aventure d'<span class="accent">Euro-Office</span>, la bureautique souveraine européenne.</h1>
     <p class="hero-lead">Actualités vérifiées, analyses et formation autour de la suite open source qui veut offrir à l'Europe une alternative à Microsoft 365 et Google Workspace.</p>
     <div class="hero-actions">
-      <a class="btn" href="/actualites/">Lire les actualités</a>
-      <a class="btn btn-ghost" href="/formation/">Découvrir la formation</a>
+      <a class="btn" href="${withBase("/actualites/")}">Lire les actualités</a>
+      <a class="btn btn-ghost" href="${withBase("/formation/")}">Découvrir la formation</a>
     </div>
   </div>
 </section>`;
@@ -130,7 +131,7 @@ function renderHome(articles, modules) {
   const featuredBlock = `<section class="container section">
   <div class="section-head">
     <h2>À la une</h2>
-    <a class="section-link" href="/actualites/">Toutes les actualités →</a>
+    <a class="section-link" href="${withBase("/actualites/")}">Toutes les actualités →</a>
   </div>
   <div class="featured-grid">
     ${articleCard(featured, { featured: true })}
@@ -143,7 +144,7 @@ function renderHome(articles, modules) {
   const formationTeaser = `<section class="container section">
   <div class="section-head">
     <h2>Espace formation</h2>
-    <a class="section-link" href="/formation/">Voir le parcours →</a>
+    <a class="section-link" href="${withBase("/formation/")}">Voir le parcours →</a>
   </div>
   <div class="formation-teaser">
     <p class="formation-intro">Vous découvrez Euro-Office ? Notre parcours en ${modules.length} étapes vous explique son intérêt, son installation et son usage au quotidien.</p>
@@ -151,7 +152,7 @@ function renderHome(articles, modules) {
       ${modules
         .map(
           (m) => `<li>
-        <a href="${m.url}">
+        <a href="${withBase(m.url)}">
           <span class="step-num">${String(m.order).padStart(2, "0")}</span>
           <span class="step-text">
             <strong>${escapeHtml(m.title)}</strong>
@@ -172,7 +173,7 @@ function renderHome(articles, modules) {
     content,
     current: "/",
     bodyClass: "page-home",
-    canonical: site.url + "/",
+    canonical: abs("/"),
   });
 }
 
@@ -195,7 +196,7 @@ ${newsletterBlock({ compact: true })}`;
       "Toute l'actualité d'Euro-Office : sorties de versions, partenariats, débats et analyses.",
     content,
     current: "/actualites/",
-    canonical: site.url + "/actualites/",
+    canonical: abs("/actualites/"),
   });
 }
 
@@ -221,7 +222,7 @@ function renderArticle(article, all) {
 
   const content = `<article class="article">
   <div class="container article-head" style="--accent: ${article.accent}">
-    <a class="back-link" href="/actualites/">← Toutes les actualités</a>
+    <a class="back-link" href="${withBase("/actualites/")}">← Toutes les actualités</a>
     <p class="eyebrow">${escapeHtml(article.kicker)}</p>
     <h1>${escapeHtml(article.title)}</h1>
     <p class="article-lead">${escapeHtml(article.description)}</p>
@@ -249,7 +250,7 @@ ${newsletterBlock({ compact: true })}`;
     description: article.description,
     content,
     current: "/actualites/",
-    canonical: site.url + article.url,
+    canonical: abs(article.url),
     extraHead: articleJsonLd(article),
   });
 }
@@ -264,7 +265,7 @@ function articleJsonLd(article) {
     inLanguage: "fr",
     author: { "@type": "Organization", name: site.name },
     publisher: { "@type": "Organization", name: site.name },
-    mainEntityOfPage: site.url + article.url,
+    mainEntityOfPage: abs(article.url),
   };
   return `<script type="application/ld+json">${JSON.stringify(data)}</script>`;
 }
@@ -279,7 +280,7 @@ function renderFormationIndex(modules) {
   <div class="modules-grid">
     ${modules
       .map(
-        (m) => `<a class="module-card" href="${m.url}">
+        (m) => `<a class="module-card" href="${withBase(m.url)}">
       <span class="module-num">${String(m.order).padStart(2, "0")}</span>
       <h2>${escapeHtml(m.title)}</h2>
       <p>${escapeHtml(m.summary || "")}</p>
@@ -296,7 +297,7 @@ function renderFormationIndex(modules) {
       "Apprenez à installer et utiliser Euro-Office grâce à notre parcours de formation gratuit en plusieurs étapes.",
     content,
     current: "/formation/",
-    canonical: site.url + "/formation/",
+    canonical: abs("/formation/"),
   });
 }
 
@@ -306,13 +307,13 @@ function renderFormationModule(mod, modules) {
   const next = modules[idx + 1];
 
   const nav = `<nav class="module-pager">
-    ${prev ? `<a class="pager-prev" href="${prev.url}"><small>Précédent</small><span>${escapeHtml(prev.title)}</span></a>` : "<span></span>"}
-    ${next ? `<a class="pager-next" href="${next.url}"><small>Suivant</small><span>${escapeHtml(next.title)}</span></a>` : "<span></span>"}
+    ${prev ? `<a class="pager-prev" href="${withBase(prev.url)}"><small>Précédent</small><span>${escapeHtml(prev.title)}</span></a>` : "<span></span>"}
+    ${next ? `<a class="pager-next" href="${withBase(next.url)}"><small>Suivant</small><span>${escapeHtml(next.title)}</span></a>` : "<span></span>"}
   </nav>`;
 
   const content = `<article class="article formation-module">
   <div class="container article-head" style="--accent: #003399">
-    <a class="back-link" href="/formation/">← Parcours de formation</a>
+    <a class="back-link" href="${withBase("/formation/")}">← Parcours de formation</a>
     <p class="eyebrow">Étape ${String(mod.order).padStart(2, "0")}${mod.duration ? ` · ${escapeHtml(mod.duration)}` : ""}</p>
     <h1>${escapeHtml(mod.title)}</h1>
     ${mod.summary ? `<p class="article-lead">${escapeHtml(mod.summary)}</p>` : ""}
@@ -327,7 +328,7 @@ function renderFormationModule(mod, modules) {
     description: mod.summary || site.description,
     content,
     current: "/formation/",
-    canonical: site.url + mod.url,
+    canonical: abs(mod.url),
   });
 }
 
@@ -339,14 +340,21 @@ function renderNewsletterPage() {
     <p class="page-lead">Chaque début de mois, nous compilons pour vous les actualités marquantes du projet : nouvelles versions, partenariats, débats de la communauté et ressources de formation. Un seul e-mail, soigné et concis.</p>
   </div>
   <div class="newsletter-layout">
-    <form class="nl-form nl-form-page" data-newsletter action="/api/subscribe" method="post">
+    ${
+      site.newsletter && site.newsletter.embedUrl
+        ? `<div class="nl-embed">
+      <iframe title="Formulaire d'inscription à la newsletter" src="${site.newsletter.embedUrl}" loading="lazy" scrolling="auto" allowfullscreen></iframe>
+      <p class="nl-legal">En vous inscrivant, vous acceptez de recevoir un e-mail mensuel. Vos données ne sont jamais revendues. Désabonnement en un clic depuis chaque e-mail.</p>
+    </div>`
+        : `<form class="nl-form nl-form-page" data-newsletter action="${withBase("/api/subscribe")}" method="post">
       <label for="nl-email-page">Votre adresse e-mail</label>
       <input id="nl-email-page" type="email" name="email" required placeholder="vous@exemple.eu" autocomplete="email">
       <input type="text" name="company" tabindex="-1" autocomplete="off" class="sr-only" aria-hidden="true">
       <button type="submit" class="btn">Recevoir la newsletter</button>
       <p class="nl-status" role="status" aria-live="polite"></p>
       <p class="nl-legal">En vous inscrivant, vous acceptez de recevoir un e-mail mensuel. Vos données ne sont jamais revendues. Désabonnement en un clic depuis chaque e-mail.</p>
-    </form>
+    </form>`
+    }
     <div class="newsletter-aside">
       <h2>Au programme</h2>
       <ul class="check-list">
@@ -370,7 +378,7 @@ function renderNewsletterPage() {
       "Inscrivez-vous à la newsletter mensuelle d'Euro-Office Actus : un récapitulatif des actualités chaque mois.",
     content,
     current: "/newsletter/",
-    canonical: site.url + "/newsletter/",
+    canonical: abs("/newsletter/"),
   });
 }
 
@@ -387,7 +395,7 @@ function renderAboutPage(page, articles) {
     description: page.summary || site.description,
     content,
     current: "/a-propos/",
-    canonical: site.url + "/a-propos/",
+    canonical: abs("/a-propos/"),
   });
 }
 
@@ -395,7 +403,7 @@ function render404() {
   const content = `<section class="container section error-page">
   <h1>404</h1>
   <p>La page que vous cherchez n'existe pas (ou plus).</p>
-  <a class="btn" href="/">Retour à l'accueil</a>
+  <a class="btn" href="${withBase("/")}">Retour à l'accueil</a>
 </section>`;
   return layout({ title: "Page introuvable", content, current: "/" });
 }
@@ -408,8 +416,8 @@ function renderRss(articles) {
     .map(
       (a) => `  <item>
     <title>${escapeHtml(a.title)}</title>
-    <link>${site.url}${a.url}</link>
-    <guid>${site.url}${a.url}</guid>
+    <link>${abs(a.url)}</link>
+    <guid>${abs(a.url)}</guid>
     <pubDate>${new Date(a.date + "T08:00:00Z").toUTCString()}</pubDate>
     <description>${escapeHtml(a.description)}</description>
   </item>`
@@ -419,7 +427,7 @@ function renderRss(articles) {
 <rss version="2.0">
 <channel>
   <title>${escapeHtml(site.name)}</title>
-  <link>${site.url}/</link>
+  <link>${abs("/")}</link>
   <description>${escapeHtml(site.description)}</description>
   <language>fr</language>
   <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
@@ -431,7 +439,7 @@ ${items}
 function renderSitemap(urls) {
   const body = urls
     .map(
-      (u) => `  <url><loc>${site.url}${u}</loc></url>`
+      (u) => `  <url><loc>${abs(u)}</loc></url>`
     )
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
@@ -481,7 +489,7 @@ function build() {
   writePage("sitemap.xml", renderSitemap(urls));
   writePage(
     "robots.txt",
-    `User-agent: *\nAllow: /\nSitemap: ${site.url}/sitemap.xml\n`
+    `User-agent: *\nAllow: /\nSitemap: ${abs("/sitemap.xml")}\n`
   );
 
   // Assets statiques (CSS, JS, images, _redirects…)
