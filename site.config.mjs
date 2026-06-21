@@ -6,12 +6,10 @@ export const site = {
   shortName: "Euro-Office",
   // Domaine de production (sans slash final). Utilisé pour le flux RSS, le
   // sitemap et les liens absolus des e-mails de la newsletter.
-  // GitHub Pages : "https://davidcognasse-creator.github.io".
-  // Domaine perso / Netlify / Vercel : votre domaine (ex. "https://exemple.eu").
-  url: "https://davidcognasse-creator.github.io",
-  // Préfixe d'URL. GitHub Pages (dépôt de projet) : "/euro-office".
-  // Domaine perso, Netlify ou Vercel : laisser "".
-  basePath: "/euro-office",
+  url: "https://euro-office.fr",
+  // Préfixe d'URL. Domaine personnalisé (euro-office.fr) servi à la racine : "".
+  // GitHub Pages SANS domaine perso (dépôt de projet) : "/euro-office".
+  basePath: "",
   // Formulaire newsletter :
   //   - GitHub Pages : collez l'URL d'un formulaire Brevo dans newsletter.embedUrl.
   //   - Netlify / Vercel : laissez embedUrl vide → la fonction /api/subscribe est utilisée.
