@@ -133,13 +133,23 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.15;
 .card-link { display: flex; flex-direction: column; height: 100%; color: inherit; }
 .card-link:hover { text-decoration: none; }
 .card-media {
-  position: relative; aspect-ratio: 16 / 7;
+  position: relative; aspect-ratio: 16 / 7; overflow: hidden;
   background:
     radial-gradient(600px 200px at 80% 0%, rgba(255,255,255,0.25), transparent),
     linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 60%, #000 18%));
   display: flex; align-items: flex-end; padding: 18px;
 }
+.card-media img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  transition: transform 0.4s ease;
+}
+.card-media.has-photo::after {
+  content: ""; position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(10,14,25,0.55) 0%, rgba(10,14,25,0.12) 40%, transparent 70%);
+}
+.card:hover .card-media img { transform: scale(1.04); }
 .card-kicker {
+  position: relative; z-index: 1;
   background: rgba(255,255,255,0.16); color: #fff; backdrop-filter: blur(2px);
   font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em;
   padding: 5px 11px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.25);
@@ -216,6 +226,11 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.15;
 .article-lead { font-size: 1.25rem; color: var(--ink-soft); margin: 0 0 22px; line-height: 1.5; }
 .article-meta { display: flex; align-items: center; gap: 9px; font-size: 0.9rem; color: var(--muted); padding-bottom: 30px; border-bottom: 1px solid var(--line); }
 
+.article-hero { max-width: 920px; margin: 28px auto 0; padding-left: 24px; padding-right: 24px; }
+.article-hero img {
+  width: 100%; aspect-ratio: 16 / 8; object-fit: cover;
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+}
 .article-body { max-width: 760px; padding-top: 36px; padding-bottom: 16px; }
 .prose { font-size: 1.12rem; color: #23282f; }
 .prose.narrow, .article-body.narrow { max-width: 720px; margin: 0 auto; }

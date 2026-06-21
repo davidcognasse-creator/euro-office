@@ -117,11 +117,17 @@ export function articleCard(article, { featured = false } = {}) {
     .slice(0, 2)
     .map((t) => `<span class="tag">${escapeHtml(t)}</span>`)
     .join("");
+  const media = article.image
+    ? `<div class="card-media has-photo">
+      <img src="${withBase(article.image)}" alt="" loading="lazy" decoding="async" width="1280" height="720">
+      <span class="card-kicker">${escapeHtml(article.kicker || "Actualité")}</span>
+    </div>`
+    : `<div class="card-media" style="--accent: ${article.accent || "#003399"}">
+      <span class="card-kicker">${escapeHtml(article.kicker || "Actualité")}</span>
+    </div>`;
   return `<article class="card${featured ? " card-featured" : ""}">
   <a class="card-link" href="${withBase(article.url)}">
-    <div class="card-media" style="--accent: ${article.accent || "#003399"}">
-      <span class="card-kicker">${escapeHtml(article.kicker || "Actualité")}</span>
-    </div>
+    ${media}
     <div class="card-body">
       <div class="card-meta">
         <time datetime="${article.date}">${formatDateFr(article.date)}</time>

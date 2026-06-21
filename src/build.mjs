@@ -68,11 +68,19 @@ function loadArticles() {
       data.slug || file.replace(/\.md$/, "").replace(/^\d{4}-\d{2}-\d{2}-/, "");
     const slug = slugify(baseSlug);
     const html = rewriteLinks(marked.parse(body));
+    // Image de couverture : champ `image` explicite, sinon détection auto d'un
+    // fichier public/assets/articles/<slug>.jpg. Null = repli sur l'aplat coloré.
+    let image = data.image || null;
+    if (!image) {
+      const guess = path.join(PUBLIC, "assets", "articles", `${slug}.jpg`);
+      if (fs.existsSync(guess)) image = `/assets/articles/${slug}.jpg`;
+    }
     return {
       ...data,
       slug,
       url: `/actualites/${slug}/`,
       html,
+      image,
       bodyText: body,
       readingTime: readingTime(body),
       accent: data.accent || ACCENTS[i % ACCENTS.length],
@@ -233,6 +241,13 @@ function renderArticle(article, all) {
       ${article.author ? `<span aria-hidden="true">·</span><span>${escapeHtml(article.author)}</span>` : ""}
     </div>
   </div>
+  ${
+    article.image
+      ? `<figure class="article-hero container">
+    <img src="${withBase(article.image)}" alt="" width="1280" height="720" fetchpriority="high">
+  </figure>`
+      : ""
+  }
   <div class="container article-body prose">
     ${article.html}
     <div class="article-tags">${tags}</div>
