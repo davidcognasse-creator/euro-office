@@ -14,7 +14,7 @@ export const site = {
   //   - GitHub Pages : collez l'URL d'un formulaire Brevo dans newsletter.embedUrl.
   //   - Netlify / Vercel : laissez embedUrl vide → la fonction /api/subscribe est utilisée.
   newsletter: {
-    embedUrl: "", // ex. "https://sibforms.com/serve/MUIFxxxxxxxxxxxx"
+    embedUrl: "https://8e20c293.sibforms.com/serve/MUIFAB7JZI0gDv2P8cgwqhVaIc1BxXGNgYH87vPUZDLDFv6BvNSEkHlZWlqWN199Ql-azvp6rTTHb6-6Yii4kpwgroSReXl35Y2WzhUb8K1yRyyUb2DHZhjDSFKfBwDAhCy80eKRnhM8SG2UD1OuMxlRi_nBKfqiwelFzjvrerwbLZHbysOjTAVHlB9fVMpwmCaXFzSBaus_7ozU",
   },
   lang: "fr",
   locale: "fr_FR",
