@@ -332,6 +332,10 @@ h1, h2, h3, h4 { font-family: var(--serif); font-weight: 600; line-height: 1.15;
 .footer-col h3 { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); font-family: var(--sans); margin: 0 0 14px; }
 .footer-col a { display: block; color: var(--ink-soft); padding: 4px 0; font-size: 0.95rem; }
 .footer-col a:hover { color: var(--eu-blue); }
+/* Le bouton d'inscription du pied de page : on rétablit l'apparence du bouton
+   (texte blanc, largeur ajustée) que les règles ci-dessus écrasaient. */
+.footer-col a.btn { display: inline-flex; width: auto; color: #fff; padding: 10px 20px; margin-top: 6px; font-size: 0.85rem; }
+.footer-col a.btn:hover { color: #fff; }
 .footer-col p { color: var(--ink-soft); font-size: 0.92rem; margin: 0 0 14px; }
 .footer-bottom { display: flex; justify-content: space-between; gap: 16px; padding: 22px 24px; border-top: 1px solid var(--line); font-size: 0.85rem; color: var(--muted); flex-wrap: wrap; }
 
