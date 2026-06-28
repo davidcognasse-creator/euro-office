@@ -32,10 +32,18 @@ const MODEL = process.env.ARTICLE_MODEL || "claude-sonnet-4-6";
 // selon le slug, puis téléchargée dans public/assets/articles/<slug>.jpg.
 const IMAGE_POOL = [
   "1522071820081-009f0129c71c", // équipe de développement
-  "1531403009284-440f080d1e12", // feuille de route / planification
   "1454165804606-c3d57bc86b40", // revue de documents
   "1551434678-e076c223a692", // bureau / développeurs
   "1460925895917-afdab827c52f", // tableau de bord / données
+  "1497215728101-856f4ea42174", // poste de travail lumineux
+  "1521791136064-7986c2920216", // poignée de main / partenariat
+  "1559136555-9303baea8ebd", // open space / coworking
+  "1487058792275-0ad4aaf24ca7", // code coloré à l'écran
+  "1504384308090-c894fdcc538d", // grand open space / communauté
+  "1517245386807-bb43f82c33c4", // réunion / échange autour d'un écran
+  "1553877522-43269d4ea984", // collaboration (noir & blanc)
+  "1542435503-956c469947f6", // bureau épuré / rédaction
+  "1451187580459-43490279c0fa", // Terre de nuit / connectivité européenne
 ];
 
 function pickImageId(slug) {
