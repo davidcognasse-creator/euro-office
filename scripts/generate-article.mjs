@@ -27,6 +27,39 @@ const ARTICLES_DIR = path.join(ROOT, "content", "articles");
 const API_KEY = process.env.ANTHROPIC_API_KEY;
 const MODEL = process.env.ARTICLE_MODEL || "claude-sonnet-4-6";
 
+// Réserve de photos (Unsplash, licence libre, sans filigrane) distinctes de
+// celles des 5 articles fondateurs. Une photo est choisie de façon déterministe
+// selon le slug, puis téléchargée dans public/assets/articles/<slug>.jpg.
+const IMAGE_POOL = [
+  "1522071820081-009f0129c71c", // équipe de développement
+  "1531403009284-440f080d1e12", // feuille de route / planification
+  "1454165804606-c3d57bc86b40", // revue de documents
+  "1551434678-e076c223a692", // bureau / développeurs
+  "1460925895917-afdab827c52f", // tableau de bord / données
+];
+
+function pickImageId(slug) {
+  let h = 0;
+  for (const c of slug) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+  return IMAGE_POOL[h % IMAGE_POOL.length];
+}
+
+async function downloadImage(slug) {
+  try {
+    const id = pickImageId(slug);
+    const url = `https://images.unsplash.com/photo-${id}?w=1280&h=720&fit=crop&crop=entropy&q=72`;
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const buf = Buffer.from(await r.arrayBuffer());
+    const dir = path.join(ROOT, "public", "assets", "articles");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, `${slug}.jpg`), buf);
+    console.log(`✓ Photo ajoutée : public/assets/articles/${slug}.jpg`);
+  } catch (e) {
+    console.log(`⚠ Photo non récupérée (${e.message}) — l'article utilisera l'aplat coloré.`);
+  }
+}
+
 function today() {
   if (process.env.ARTICLE_DATE) return process.env.ARTICLE_DATE;
   return new Date().toISOString().slice(0, 10);
@@ -142,6 +175,7 @@ async function main() {
   const filename = `${date}-${parsed.slug}.md`;
   const outPath = path.join(ARTICLES_DIR, filename);
   fs.writeFileSync(outPath, parsed.content.endsWith("\n") ? parsed.content : parsed.content + "\n");
+  await downloadImage(parsed.slug);
 
   console.log(`✓ Article généré : content/articles/${filename}`);
   console.log(`  Titre : ${parsed.data.title}`);

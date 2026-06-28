@@ -74,7 +74,7 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           if [ "$MODE" = "publish" ]; then
-            git add "$FILE"
+            git add "$FILE" public/assets/articles
             git commit -m "Article automatique : $TITLE"
             git push origin "HEAD:$BASE"
             echo "✓ Article publié sur $BASE."
@@ -86,7 +86,7 @@ jobs:
           else
             BRANCH="auto-article/$DATE"
             git checkout -b "$BRANCH"
-            git add "$FILE"
+            git add "$FILE" public/assets/articles
             git commit -m "Brouillon d'article (veille IA) : $TITLE"
             git push -u origin "$BRANCH"
             cat > /tmp/pr-body.md <<EOF
