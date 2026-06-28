@@ -1,21 +1,22 @@
 name: Article quotidien (veille IA)
 
-# Génère chaque jour un brouillon d'article à partir de l'actualité Euro-Office.
-# Par défaut (mode « review ») : ouvre une Pull Request à relire et valider.
-# En mode « publish » : met l'article en ligne directement.
+# Génère chaque jour un article à partir de l'actualité Euro-Office.
+# Par défaut (mode « publish ») : l'article est mis en ligne directement.
+# En mode « review » : ouvre une Pull Request à relire et valider.
 on:
   schedule:
     - cron: "0 6 * * *" # tous les jours à 6h00 UTC
   workflow_dispatch:
     inputs:
       mode:
-        description: "review (PR à valider) ou publish (mise en ligne directe)"
+        description: "publish (mise en ligne directe) ou review (PR à valider)"
         required: false
-        default: "review"
+        default: "publish"
 
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 jobs:
   generate:
@@ -63,7 +64,7 @@ jobs:
         if: steps.detect.outputs.created == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MODE: ${{ github.event.inputs.mode || 'review' }}
+          MODE: ${{ github.event.inputs.mode || 'publish' }}
           TITLE: ${{ steps.detect.outputs.title }}
           DATE: ${{ steps.gen.outputs.date }}
           FILE: ${{ steps.detect.outputs.file }}
@@ -76,7 +77,12 @@ jobs:
             git add "$FILE"
             git commit -m "Article automatique : $TITLE"
             git push origin "HEAD:$BASE"
-            echo "✓ Article publié directement sur $BASE."
+            echo "✓ Article publié sur $BASE."
+            # Un push effectué avec le GITHUB_TOKEN ne déclenche pas d'autre
+            # workflow : on lance donc le déploiement explicitement.
+            gh workflow run deploy-pages.yml --ref "$BASE" \
+              && echo "✓ Déploiement déclenché." \
+              || echo "⚠ Déclenchement du déploiement à vérifier."
           else
             BRANCH="auto-article/$DATE"
             git checkout -b "$BRANCH"

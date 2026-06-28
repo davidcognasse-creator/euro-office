@@ -173,17 +173,19 @@ d'article en français, en évitant les sujets déjà traités (max 1/jour).
 
 ### Fonctionnement
 
-- **Mode `review` (défaut)** : l'action ouvre une **Pull Request** avec le
-  brouillon. Vous **relisez, vérifiez la source, ajustez**, puis **fusionnez
-  pour publier**. C'est le garde-fou recommandé pour un site d'actualité.
-- **Mode `publish`** : l'article est **mis en ligne directement** (lancez le
-  workflow manuellement avec l'entrée `mode=publish`, ou changez le `cron`).
+- **Mode `publish` (défaut)** : l'article est **mis en ligne directement** et
+  le déploiement est déclenché automatiquement, sans relecture.
+- **Mode `review`** : l'action ouvre une **Pull Request** avec le brouillon ;
+  vous **relisez, vérifiez la source, ajustez**, puis **fusionnez pour
+  publier**. Lancez le workflow manuellement avec l'entrée `mode=review`.
 
 Test manuel : *Actions → « Article quotidien (veille IA) » → Run workflow*.
 Le script ne crée rien s'il ne trouve pas d'actualité nouvelle et notable.
 
-> ⚠️ Un texte rédigé par IA peut comporter des erreurs : conservez de
-> préférence le **mode review** et vérifiez chaque article avant publication.
+> ⚠️ En mode `publish`, les articles rédigés par IA sont **publiés sans
+> relecture humaine** : ils peuvent comporter des erreurs ou des imprécisions.
+> Surveillez le site et repassez en `mode review` si besoin (changez le défaut
+> dans `.github/workflows/auto-article.yml`).
 
 ## 🗂️ Structure du projet
 
