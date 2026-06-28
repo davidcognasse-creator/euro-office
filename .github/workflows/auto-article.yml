@@ -1,0 +1,102 @@
+name: Article quotidien (veille IA)
+
+# Génère chaque jour un brouillon d'article à partir de l'actualité Euro-Office.
+# Par défaut (mode « review ») : ouvre une Pull Request à relire et valider.
+# En mode « publish » : met l'article en ligne directement.
+on:
+  schedule:
+    - cron: "0 6 * * *" # tous les jours à 6h00 UTC
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "review (PR à valider) ou publish (mise en ligne directe)"
+        required: false
+        default: "review"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - run: npm ci
+
+      - name: Générer l'article
+        id: gen
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ARTICLE_MODEL: ${{ vars.ARTICLE_MODEL }}
+        run: |
+          ARTICLE_DATE="$(date -u +%F)"
+          export ARTICLE_DATE
+          echo "date=$ARTICLE_DATE" >> "$GITHUB_OUTPUT"
+          node scripts/generate-article.mjs
+
+      - name: Détecter un nouvel article
+        id: detect
+        run: |
+          NEW=$(git status --porcelain content/articles | awk '/^\?\?/{print $2}' | head -1)
+          if [ -z "$NEW" ]; then
+            echo "Aucun nouvel article aujourd'hui."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "created=true" >> "$GITHUB_OUTPUT"
+            echo "file=$NEW" >> "$GITHUB_OUTPUT"
+            TITLE=$(grep -m1 '^title:' "$NEW" | sed -E 's/^title:[[:space:]]*"?([^"]*)"?.*/\1/')
+            echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Vérifier que le site compile avec le nouvel article
+        if: steps.detect.outputs.created == 'true'
+        run: npm run build
+
+      - name: Ouvrir une PR ou publier
+        if: steps.detect.outputs.created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODE: ${{ github.event.inputs.mode || 'review' }}
+          TITLE: ${{ steps.detect.outputs.title }}
+          DATE: ${{ steps.gen.outputs.date }}
+          FILE: ${{ steps.detect.outputs.file }}
+          BASE: ${{ github.ref_name }}
+        run: |
+          git config user.name "euro-office-bot"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if [ "$MODE" = "publish" ]; then
+            git add "$FILE"
+            git commit -m "Article automatique : $TITLE"
+            git push origin "HEAD:$BASE"
+            echo "✓ Article publié directement sur $BASE."
+          else
+            BRANCH="auto-article/$DATE"
+            git checkout -b "$BRANCH"
+            git add "$FILE"
+            git commit -m "Brouillon d'article (veille IA) : $TITLE"
+            git push -u origin "$BRANCH"
+            cat > /tmp/pr-body.md <<EOF
+          Article généré automatiquement par la **veille IA**, à **relire et valider** avant publication.
+
+          **Fichier :** \`$FILE\`
+
+          Avant de fusionner :
+          - [ ] Vérifier les **faits** et la **source** citée
+          - [ ] Ajuster le texte si besoin
+          - [ ] (Optionnel) ajouter une **photo** dans \`public/assets/articles/\` au nom du slug
+
+          **Fusionner cette PR = publier l'article** sur le site.
+          EOF
+            gh pr create --base "$BASE" --head "$BRANCH" \
+              --title "📰 Brouillon : $TITLE" \
+              --body-file /tmp/pr-body.md
+            echo "✓ Pull Request ouverte pour validation."
+          fi

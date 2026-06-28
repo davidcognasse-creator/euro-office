@@ -154,6 +154,37 @@ depuis GitHub Actions).
 
 ---
 
+## 🤖 Génération automatique d'articles (veille IA)
+
+Une GitHub Action quotidienne (`.github/workflows/auto-article.yml`) recherche
+l'actualité Euro-Office via **Claude + recherche web** et rédige un brouillon
+d'article en français, en évitant les sujets déjà traités (max 1/jour).
+
+### Mise en place (une fois)
+
+1. Ajoutez le secret **`ANTHROPIC_API_KEY`** dans
+   *Settings → Secrets and variables → Actions* (clé depuis
+   [console.anthropic.com](https://console.anthropic.com)).
+2. Pour le **mode review** (recommandé), autorisez les Actions à ouvrir des PR :
+   *Settings → Actions → General → Workflow permissions* → cocher
+   **« Allow GitHub Actions to create and approve pull requests »** et
+   **« Read and write permissions »**.
+3. *(Optionnel)* variable `ARTICLE_MODEL` pour changer de modèle.
+
+### Fonctionnement
+
+- **Mode `review` (défaut)** : l'action ouvre une **Pull Request** avec le
+  brouillon. Vous **relisez, vérifiez la source, ajustez**, puis **fusionnez
+  pour publier**. C'est le garde-fou recommandé pour un site d'actualité.
+- **Mode `publish`** : l'article est **mis en ligne directement** (lancez le
+  workflow manuellement avec l'entrée `mode=publish`, ou changez le `cron`).
+
+Test manuel : *Actions → « Article quotidien (veille IA) » → Run workflow*.
+Le script ne crée rien s'il ne trouve pas d'actualité nouvelle et notable.
+
+> ⚠️ Un texte rédigé par IA peut comporter des erreurs : conservez de
+> préférence le **mode review** et vérifiez chaque article avant publication.
+
 ## 🗂️ Structure du projet
 
 ```
@@ -170,8 +201,10 @@ euro-office/
 ├── public/assets/       # CSS, JS, favicon (copiés tels quels)
 ├── api/subscribe.js     # fonction d'inscription (Vercel)
 ├── netlify/functions/   # fonction d'inscription (Netlify)
-├── scripts/send-newsletter.mjs   # génération + envoi de la newsletter
-├── .github/workflows/   # CI : déploiement + newsletter mensuelle
+├── scripts/
+│   ├── send-newsletter.mjs    # génération + envoi de la newsletter
+│   └── generate-article.mjs   # veille IA : rédaction d'un brouillon d'article
+├── .github/workflows/   # déploiement + newsletter mensuelle + article quotidien
 ├── site.config.mjs      # configuration centrale (nom, URL, nav…)
 └── dist/                # sortie générée (non versionnée)
 ```
